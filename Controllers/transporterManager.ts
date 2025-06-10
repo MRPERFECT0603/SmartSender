@@ -1,21 +1,36 @@
-// utils/transporterManager.ts
+import { userModel } from '../Models/userModel';
 import nodemailer from "nodemailer";
-import { authorize } from "../Services/authService";
+import { google } from "googleapis";
 import dotenv from "dotenv";
-import { Request, Response } from 'express';
 
 dotenv.config();
 
-const transporters: Record<string, nodemailer.Transporter> = {};
-
 export const getTransporter = async (fromEmail: string): Promise<nodemailer.Transporter> => {
 
-  if (transporters[fromEmail]) {
-    return transporters[fromEmail];
+  const userData = await userModel.findOne({ email: fromEmail });
+
+  if (!userData) {
+    throw new Error("User not found or refresh token is missing");
   }
 
-  const oAuth2Client = await authorize(fromEmail);
-  const accessToken = await oAuth2Client.getAccessToken();
+  const oAuth2Client = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    process.env.REDIRECT_URI 
+  );
+
+  oAuth2Client.setCredentials({
+    refresh_token: userData.refreshToken
+  });
+
+
+  const accessTokenResponse = await oAuth2Client.getAccessToken();
+  const accessToken = accessTokenResponse.token;
+
+  if (!accessToken) {
+    throw new Error("Failed to get access token from refresh token");
+  }
+
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -24,21 +39,10 @@ export const getTransporter = async (fromEmail: string): Promise<nodemailer.Tran
       user: fromEmail,
       clientId: process.env.CLIENT_ID!,
       clientSecret: process.env.CLIENT_SECRET!,
-      refreshToken: oAuth2Client.credentials.refresh_token!,
-      accessToken: accessToken.token!,
+      refreshToken: userData.refreshToken,
+      accessToken: accessToken,
     },
   });
 
-  transporters[fromEmail] = transporter;
   return transporter;
 };
-
-export const getTransporterAPI = (req: Request<{ userEmail: string }> , res: Response)=>{
-  const userEmail = req.body;
-  getTransporter(userEmail).then((transporter) =>{
-    res.status(200).send("Transporter Created.");
-  })
-  .catch((err: Error) => {
-    res.status(500).send("Error creating transporter: " + err.message);
-  });
-}
