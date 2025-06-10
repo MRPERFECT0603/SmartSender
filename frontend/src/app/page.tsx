@@ -1,7 +1,7 @@
 export default function HomePage() {
   return (
     
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 text-center">
+    <main className="min-h-screen bg-custom-lightblue flex flex-col items-center justify-center px-4 text-center">
       <div className="max-w-2xl">
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
           Welcome to <span className="text-blue-600">SmartSender</span>
