@@ -1,6 +1,6 @@
 // controllers/emailController.ts
 import { Request, Response } from "express";
-import { getTransporter } from "../Controllers/transporterManager";
+import { getTransporter } from "./transporterManager";
 
 
 export const sendMail = async (req: Request, res: Response) => {
