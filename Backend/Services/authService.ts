@@ -83,7 +83,7 @@ export function getNewToken(
   const authUrl = client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
-    prompt: 'select_account',
+    prompt: 'select_account consent',
     state,
   });
 

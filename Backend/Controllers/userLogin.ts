@@ -8,7 +8,7 @@ dotenv.config();
 
 export const userLogin = async (req: Request, res: Response) : Promise<any> => {
     try {
-        const { email } = req.body; 
+        const { email , password , userName} = req.body; 
         let oAuth2Client;
         let accessToken;
 
@@ -24,8 +24,10 @@ export const userLogin = async (req: Request, res: Response) : Promise<any> => {
 
             accessToken = await oAuth2Client.getAccessToken();
             userData = new userModel({
+                userName,
                 email,
                 refreshToken: refresh_token,
+                password
             });
 
             await userData.save();

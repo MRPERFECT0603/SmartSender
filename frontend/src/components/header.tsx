@@ -2,26 +2,24 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { FaUser } from 'react-icons/fa';
+
 
 export default function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md sticky top-0 z-50">
-      <h1 className="text-xl font-bold text-blue-600">SmartInbox</h1>
+    <header className="flex items-center justify-between px-6 py-4 mx-36 bg-white shadow-md sticky top-5 z-50 rounded-2xl">
+      <h1 className="text-xl font-bold text-blue-600">SmartSender</h1>
       <nav className="space-x-4">
-        <Link
-          href="/dashboard"
-          className={`hover:text-blue-500 ${pathname === '/dashboard' ? 'font-semibold text-blue-600' : ''}`}
-        >
-          Dashboard
-        </Link>
+        <div className='flex items-center gap-2'>
         <Link
           href="/login"
-          className={`hover:text-blue-500 ${pathname === '/login' ? 'font-semibold text-blue-600' : ''}`}
+          className={`hover:text-blue-500 ${pathname === '/login' ? 'font-semibold text-custom-blue' : ''}`}
         >
-          Login
+        <FaUser className="text-xm" />
         </Link>
+        </div>
       </nav>
     </header>
   )
