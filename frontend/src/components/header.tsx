@@ -10,7 +10,7 @@ export default function Header() {
 
   return (
     <header className="flex items-center justify-between px-6 py-4 mx-36 bg-white shadow-md sticky top-5 z-50 rounded-2xl">
-      <h1 className="text-xl font-bold text-blue-600">SmartSender</h1>
+      <h1 className="text-xl font-bold text-blue-600"><Link href="/">SmartSender</Link></h1>
       <nav className="space-x-4">
         <div className='flex items-center gap-2'>
         <Link
