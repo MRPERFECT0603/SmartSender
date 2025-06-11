@@ -4,7 +4,7 @@
 
 SmartSender is a full-stack web application that enables users to send personalized bulk emails efficiently. Built with Next.js frontend and Node.js/Express backend, it integrates with Gmail OAuth2 for secure email sending and supports Excel/CSV file uploads for contact management.
 
-## 🚀 Features
+## Features
 
 - **OAuth2 Gmail Integration**: Secure authentication with Google Gmail API
 - **Bulk Email Sending**: Send personalized emails to multiple recipients
@@ -14,7 +14,7 @@ SmartSender is a full-stack web application that enables users to send personali
 - **Export Results**: Download email status reports as Excel files
 - **Responsive UI**: Modern, mobile-friendly interface built with Tailwind CSS
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Next.js 15** - React framework
@@ -34,16 +34,7 @@ SmartSender is a full-stack web application that enables users to send personali
 - **Multer** - File upload handling
 - **XLSX** - Excel file processing
 
-## 📋 Prerequisites
-
-Before running this application, make sure you have:
-
-- Node.js (v16 or higher)
-- MongoDB database
-- Google Cloud Console project with Gmail API enabled
-- Gmail account for sending emails
-
-## 🔧 Installation
+## Installation
 
 ### 1. Clone the Repository
 
@@ -85,7 +76,7 @@ npm install
 5. Add `http://localhost:8101/callback` to authorized redirect URIs
 6. Add your client ID and secret to the backend `.env` file
 
-## 🚀 Running the Application
+## Running the Application
 
 ### Start Backend Server
 
@@ -105,7 +96,7 @@ npm run dev
 
 The frontend application will run on `http://localhost:3000`
 
-## 📖 Usage
+## Usage
 
 ### 1. User Authentication
 - Navigate to `/login`
@@ -132,44 +123,7 @@ The frontend application will run on `http://localhost:3000`
 - Red highlighting indicates failed delivery
 - Download status report as Excel file
 
-## 📁 Project Structure
-
-```
-SmartSender/
-├── Backend/
-│   ├── Config/
-│   │   └── dbConfig.ts          # Database configuration
-│   ├── Controllers/
-│   │   ├── mailController.ts    # Email sending logic
-│   │   ├── transporterManager.ts # Gmail transporter setup
-│   │   ├── userLogin.ts         # User authentication
-│   │   └── xlsxController.ts    # File upload handling
-│   ├── Models/
-│   │   └── userModel.ts         # User data model
-│   ├── Routes/
-│   │   └── MailRoutes.ts        # API routes
-│   ├── Services/
-│   │   └── authService.ts       # OAuth2 service
-│   ├── package.json
-│   ├── server.ts                # Main server file
-│   └── tsconfig.json
-├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── dashboard/       # Dashboard page
-│   │   │   ├── login/          # Login page
-│   │   │   ├── globals.css     # Global styles
-│   │   │   ├── layout.tsx      # Root layout
-│   │   │   └── page.tsx        # Home page
-│   │   └── components/
-│   │       └── header.tsx      # Header component
-│   ├── package.json
-│   ├── next.config.ts
-│   └── tailwind.config.js
-└── README.md
-```
-
-## 🔐 Environment Variables
+## Environment Variables
 
 ### Backend (.env)
 ```env
@@ -180,7 +134,7 @@ REDIRECT_URI=http://localhost:8101/callback
 SCOPES=https://www.googleapis.com/auth/gmail.send
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -189,7 +143,7 @@ SCOPES=https://www.googleapis.com/auth/gmail.send
 | POST | `/api/sendmail` | Send bulk emails |
 | GET | `/callback` | OAuth2 callback handler |
 
-## 🔒 Security Features
+## Security Features
 
 - OAuth2 authentication with Google
 - Secure token management with refresh tokens
@@ -197,7 +151,7 @@ SCOPES=https://www.googleapis.com/auth/gmail.send
 - CORS protection
 - Environment variable protection
 
-## 🎨 Email Personalization
+## Email Personalization
 
 The application automatically personalizes emails with:
 - Recipient's name in greeting: "Dear [Name]"
@@ -205,15 +159,15 @@ The application automatically personalizes emails with:
 
 Example:
 ```
-Dear John Doe,
+Dear Vivek,
 
 Your email content here...
 
 Yours,
-Jane Smith
+Shaurya
 ```
 
-## 📊 File Format Requirements
+## File Format Requirements
 
 ### Excel/CSV Format
 Your contact file should include these columns:
@@ -227,30 +181,7 @@ John Doe,john@example.com
 Jane Smith,jane@example.com
 ```
 
-## 🚨 Troubleshooting
-
-### Common Issues
-
-1. **OAuth2 Authentication Failed**
-   - Verify your Google Cloud Console setup
-   - Check redirect URI configuration
-   - Ensure Gmail API is enabled
-
-2. **Database Connection Error**
-   - Verify MongoDB is running
-   - Check CONNECTION_STRING in .env file
-
-3. **Email Sending Failed**
-   - Verify Gmail account permissions
-   - Check if 2FA is enabled (may require app passwords)
-   - Ensure OAuth2 tokens are valid
-
-4. **File Upload Issues**
-   - Check file format (only .xlsx and .csv supported)
-   - Ensure required columns (name, email) are present
-   - Verify file size limits
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -258,20 +189,20 @@ Jane Smith,jane@example.com
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the ISC License. See the [LICENSE](LICENSE) file for details.
 
-## 👥 Authors
+## Authors
 
 - **MRPERFECT0603** - *Initial work* - [GitHub](https://github.com/MRPERFECT0603)
 
-## 🔗 Links
+## Links
 
 - [Repository](https://github.com/MRPERFECT0603/SmartSender)
 - [Issues](https://github.com/MRPERFECT0603/SmartSender/issues)
 
-## 📞 Support
+## Support
 
 If you encounter any issues or have questions, please:
 1. Check the troubleshooting section above
@@ -280,5 +211,5 @@ If you encounter any issues or have questions, please:
 
 ---
 
-Made with ❤️ by MRPERFECT0603
+Made with 💙 by MRPERFECT0603
 
