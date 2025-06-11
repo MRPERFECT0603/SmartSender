@@ -38,16 +38,17 @@ export default function LoginPage() {
                 onSubmit={handleSubmit}
                 className="bg-white p-8 rounded shadow-md w-full max-w-sm space-y-6"
             >
-                <h2 className="text-2xl font-semibold text-center">Login to SmartInbox</h2>
+                <h2 className="text-2xl font-semibold text-center">Login to SmartSender</h2>
 
                  <div>
-                    <label className="block text-sm font-medium">User</label>
+                    <label className="block text-sm font-medium">UserName</label>
                     <input
                         type="userName"
                         className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         value={userName}
                         onChange={e => setUser(e.target.value)}
                         required
+                        placeholder='Yours [UserName]'
                     />
                 </div>
 
@@ -59,6 +60,7 @@ export default function LoginPage() {
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         required
+                        placeholder='Your Email'
                     />
                 </div>
 
@@ -70,6 +72,7 @@ export default function LoginPage() {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         required
+                        placeholder='Your Password'
                     />
                 </div>
 
