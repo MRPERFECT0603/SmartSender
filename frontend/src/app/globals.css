@@ -13,5 +13,5 @@
   }
 }
 .animate-fakeProgress {
-  animation: fakeProgress 3s linear forwards;
+  animation: fakeProgress 5s linear forwards;
 }
