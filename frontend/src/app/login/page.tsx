@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 export default function LoginPage() {
     const [email, setEmail] = useState('')
     const [userName, setUser] = useState('')
+    const [contact, setContact] = useState('')
+    const [linkedIn, setLinkedIn] = useState('')
     const router = useRouter()
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -21,7 +23,11 @@ export default function LoginPage() {
 
             if (res.ok) {
                 console.log('Login success:', data)
-                router.push(`/dashboard?userEmail=${encodeURIComponent(email)}&userName=${encodeURIComponent(userName)}`)
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userName', userName);
+                localStorage.setItem('contact', contact);
+                localStorage.setItem('linkedIn', linkedIn);
+                router.push(`/dashboard`)
             } else {
                 alert(data.error || 'Login failed')
             }
@@ -60,6 +66,31 @@ export default function LoginPage() {
                         onChange={e => setEmail(e.target.value)}
                         required
                         placeholder='Your Email'
+                    />
+                </div>
+
+                     <div>
+                    <label className="block text-sm font-medium">Contact No.</label>
+                    <input
+                        type="contact"
+                        className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        value={contact}
+                        onChange={e => setContact(e.target.value)}
+                        required
+                        placeholder='Your Contact No'
+                    />
+                </div>
+
+
+                     <div>
+                    <label className="block text-sm font-medium">LinkedIn</label>
+                    <input
+                        type="linkedin"
+                        className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        value={linkedIn}
+                        onChange={e => setLinkedIn(e.target.value)}
+                        required
+                        placeholder='Your LinkedIn'
                     />
                 </div>
 
