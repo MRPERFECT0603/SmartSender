@@ -2,7 +2,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 
@@ -15,7 +14,6 @@ interface ExcelRow {
 
 export default function DashboardPage() {
 
-  const searchParams = useSearchParams()
   const [excelData, setExcelData] = useState<ExcelRow[]>([])
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
@@ -23,6 +21,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState('')
   const [subject, setSubject] = useState('')
   const [text, setText] = useState('')
+  const [linkendIn, setLinkedIn] = useState('')
+  const [contact, setContact] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mailStatus, setMailStatus] = useState('')
   const [perEmailStatus, setPerEmailStatus] = useState<
@@ -31,11 +31,15 @@ export default function DashboardPage() {
   const [attachments, setAttachments] = useState<File[]>([]);
 
   useEffect(() => {
-    const userEmail = searchParams.get('userEmail')
-    const userName = searchParams.get('userName')
+    const userEmail = localStorage.getItem('userEmail')
+    const userName = localStorage.getItem('userName')
+    const contact = localStorage.getItem('contact')
+    const linkendIn = localStorage.getItem('linkedIn')
     if (userEmail) setFromEmail(userEmail)
     if (userName) setUser(userName)
-  }, [searchParams])
+    if (contact) setContact(contact)
+    if (linkendIn) setLinkedIn(linkendIn)
+  }, [])
 
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +90,8 @@ export default function DashboardPage() {
     formData.append("user", user);
     formData.append("subject", subject);
     formData.append("text", text);
+    formData.append("contact", contact);
+    formData.append("linkenIn", linkendIn);
     formData.append("xlsxData", JSON.stringify(excelData));
     attachments.forEach((file) => {
       formData.append(`attachments`, file);
@@ -323,16 +329,33 @@ export default function DashboardPage() {
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <p className="mt-6">
-              Yours,
+              Best Regards,
               <br />
               <input
                 type="text"
                 value={user}
                 onChange={(e) => setUser(e.target.value)}
                 placeholder="Your Name"
-                className="inline-block w-32 border-b border-gray-400 focus:outline-none focus:border-blue-400"
+                className="inline-block w-32 border-gray-400 focus:outline-none focus:border-blue-400"
               />
             </p>
+              <input
+                type="text"
+                value={contact}
+                onChange={(e) => setUser(e.target.value)}
+                placeholder="Contact Info" 
+                className="inline-block w-32 border-gray-400 focus:outline-none focus:border-blue-400"
+              />
+              <br />
+              <input
+                type="text"
+                value={linkendIn}
+                onChange={(e) => setUser(e.target.value)}
+                placeholder="LinkedIn ID"
+                className="inline-block w-48 border-gray-400 focus:outline-none focus:border-blue-400"
+              />
+              <span className="ml-4 w-32 border-gray-400 focus:outline-none focus:border-blue-400">
+                *[This will be a HyperLink in the Mail.]</span>
           </div>
 
           <button
