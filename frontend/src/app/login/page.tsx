@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
     const [userName, setUser] = useState('')
     const router = useRouter()
     const handleSubmit = async (e: React.FormEvent) => {
@@ -15,7 +14,7 @@ export default function LoginPage() {
             const res = await fetch('http://localhost:8101/api/userlogin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password , userName}),
+                body: JSON.stringify({ email , userName}),
             })
 
             const data = await res.json()
@@ -33,7 +32,7 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-custom-lightblue rounded-2xl shadow-2xl">
+        <div className="flex  items-center justify-center h-fit bg-custom-lightblue rounded-2xl pt-20">
             <form
                 onSubmit={handleSubmit}
                 className="bg-white p-8 rounded shadow-md w-full max-w-sm space-y-6"
@@ -61,18 +60,6 @@ export default function LoginPage() {
                         onChange={e => setEmail(e.target.value)}
                         required
                         placeholder='Your Email'
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium">Password</label>
-                    <input
-                        type="password"
-                        className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        required
-                        placeholder='Your Password'
                     />
                 </div>
 
