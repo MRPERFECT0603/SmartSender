@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
-
+import { BASE_URL } from "../../../src/config"
 
 interface ExcelRow {
   sno: number
@@ -51,7 +51,8 @@ export default function DashboardPage() {
 
     setLoading(true)
     try {
-      const res = await fetch('http://localhost:8101/api/upload', {
+      console.log(BASE_URL);
+      const res = await fetch(`${BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       })
@@ -106,7 +107,7 @@ export default function DashboardPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:8101/api/sendmail', {
+      const res = await fetch(`${BASE_URL}/api/sendmail`, {
         method: 'POST',
         body: formData,
       });
