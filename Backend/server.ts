@@ -5,11 +5,11 @@ import MailRouter from "./Routes/MailRoutes";
 import { handleCallback } from "./Services/authService";
 import {connectDB} from "./Config/dbConfig";
 import dotenv from "dotenv";
+dotenv.config();
 
 const app:Express = express();
-const PORT = 8101;
+const PORT = process.env.PORT;
 
-dotenv.config();
 //middleware
 app.use(express.json());
 
