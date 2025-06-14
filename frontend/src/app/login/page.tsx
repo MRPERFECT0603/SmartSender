@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { BASE_URL } from "../../../src/config"
+
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -13,7 +15,7 @@ export default function LoginPage() {
         e.preventDefault()
 
         try {
-            const res = await fetch('http://localhost:8101/api/userlogin', {
+            const res = await fetch(`${BASE_URL}/api/userlogin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email , userName}),
