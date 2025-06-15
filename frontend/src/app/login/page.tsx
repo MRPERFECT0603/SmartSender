@@ -12,32 +12,36 @@ export default function LoginPage() {
     const [linkedIn, setLinkedIn] = useState('')
     const router = useRouter()
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
 
         try {
             const res = await fetch(`${BASE_URL}/api/userlogin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email , userName}),
-            })
+                body: JSON.stringify({ email, userName }),
+            });
 
-            const data = await res.json()
+            const data = await res.json();
 
-            if (res.ok) {
-                console.log('Login success:', data)
+            if (res.status === 200) {
+                console.log('Login success:', data);
                 localStorage.setItem('userEmail', email);
                 localStorage.setItem('userName', userName);
                 localStorage.setItem('contact', contact);
                 localStorage.setItem('linkedIn', linkedIn);
-                router.push(`/dashboard`)
-            } else {
-                alert(data.error || 'Login failed')
+                router.push(`/dashboard`);
+            }
+            else if (res.status === 202 && data.authUrl) {
+                window.location.href = data.authUrl;
+            }
+            else {
+                alert(data.error || 'Login failed');
             }
         } catch (err) {
-            console.error('Login error:', err)
-            alert('Something went wrong. Please try again.')
+            console.error('Login error:', err);
+            alert('Something went wrong. Please try again.');
         }
-    }
+    };
 
     return (
         <div className="flex  items-center justify-center h-fit bg-custom-lightblue rounded-2xl pt-20">
@@ -47,7 +51,7 @@ export default function LoginPage() {
             >
                 <h2 className="text-2xl font-semibold text-center">Login to SmartSender</h2>
 
-                 <div>
+                <div>
                     <label className="block text-sm font-medium">UserName</label>
                     <input
                         type="userName"
@@ -71,7 +75,7 @@ export default function LoginPage() {
                     />
                 </div>
 
-                     <div>
+                <div>
                     <label className="block text-sm font-medium">Contact No.</label>
                     <input
                         type="contact"
@@ -84,7 +88,7 @@ export default function LoginPage() {
                 </div>
 
 
-                     <div>
+                <div>
                     <label className="block text-sm font-medium">LinkedIn</label>
                     <input
                         type="linkedin"
