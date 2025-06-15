@@ -77,7 +77,7 @@ export async function handleCallback(req: Request, res: Response): Promise<void>
 export function getNewToken(
   client: Auth.OAuth2Client,
   email: string,
-  callback: (error: Error | null, success?: boolean) => void
+  callback: (error: Error | null, success?: boolean , authUrl?: string) => void
 ): void {
   const state = encodeURIComponent(email);
   const authUrl = client.generateAuthUrl({
@@ -89,7 +89,7 @@ export function getNewToken(
 
   console.log(JSON.stringify({
     level: 'info',
-    service: 'auth-service_mailcronjob',
+    service: 'auth-service',
     event: 'auth_url_generated',
     message: 'Prompting user for OAuth authorization',
     email,
@@ -97,48 +97,39 @@ export function getNewToken(
     timestamp: new Date().toISOString(),
   }));
 
-  openURL.open(authUrl);
+  // openURL.open(authUrl);
 
   client.once('tokensSaved', (error: Error | null) => {
     if (error) return callback(error);
-    callback(null, true);
+    callback(null, true , authUrl);
   });
 }
 
 /**
  * Authorizes the client using existing token or initiates a new token flow
  */
-export async function authorize(email: string): Promise<Auth.OAuth2Client> {
+export async function authorize(email: string): Promise<{ client: Auth.OAuth2Client, authUrl: string }> {
   try {
-      await new Promise<void>((resolve, reject) => {
-        getNewToken(oAuth2Client, email, (err) => {
-          if (err) return reject(err);
-          resolve();
-        });
-      });
+    const authUrl = oAuth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: SCOPES,
+      prompt: 'select_account consent',
+      state: encodeURIComponent(email),
+    });
 
-      console.log(JSON.stringify({
-        level: 'info',
-        service: 'auth-service_mailcronjob',
-        event: 'authorization_complete',
-        message: 'User authorization completed and token saved',
-        email,
-        timestamp: new Date().toISOString(),
-      }));
-    return oAuth2Client;
-  } catch (error: any) {
-    console.error(JSON.stringify({
-      level: 'error',
+    console.log(JSON.stringify({
+      level: 'info',
       service: 'auth-service',
-      event: 'fetch_token_error',
-      message: 'Error fetching token from DB',
+      event: 'auth_url_generated',
+      message: 'Prompting user for OAuth authorization',
       email,
-      error: error.message,
-      stack: error.stack,
+      authUrl,
       timestamp: new Date().toISOString(),
     }));
 
-    throw error;
+    return { client: oAuth2Client, authUrl }; // return this instead of waiting for callback
+  } catch (error: any) {
+    throw new Error(`Failed to authorize: ${error.message}`);
   }
 }
 
