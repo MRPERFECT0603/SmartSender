@@ -1,7 +1,7 @@
 import { google, Auth } from 'googleapis';
 import dotenv from 'dotenv';
-import openURL from 'openurl';
 import { Request, Response } from 'express';
+import { userModel } from '../Models/userModel';
 
 
 dotenv.config();
@@ -39,10 +39,15 @@ export async function handleCallback(req: Request, res: Response): Promise<void>
 
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
-
-    const savedToken = JSON.stringify(tokens);
-
-
+    if (tokens.refresh_token) {
+      let user = await userModel.findOne({ email });
+      if (!user) {
+        user = new userModel({ email, refreshToken: tokens.refresh_token});
+      } else {
+        user.refreshToken = tokens.refresh_token;
+      }
+      await user.save();
+    }
     console.log(JSON.stringify({
       level: 'info',
       service: 'auth-service',
@@ -77,7 +82,7 @@ export async function handleCallback(req: Request, res: Response): Promise<void>
 export function getNewToken(
   client: Auth.OAuth2Client,
   email: string,
-  callback: (error: Error | null, success?: boolean , authUrl?: string) => void
+  callback: (error: Error | null, success?: boolean, authUrl?: string) => void
 ): void {
   const state = encodeURIComponent(email);
   const authUrl = client.generateAuthUrl({
@@ -101,7 +106,7 @@ export function getNewToken(
 
   client.once('tokensSaved', (error: Error | null) => {
     if (error) return callback(error);
-    callback(null, true , authUrl);
+    callback(null, true, authUrl);
   });
 }
 
