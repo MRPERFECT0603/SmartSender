@@ -42,7 +42,7 @@ export async function handleCallback(req: Request, res: Response): Promise<void>
     if (tokens.refresh_token) {
       let user = await userModel.findOne({ email });
       if (!user) {
-        user = new userModel({ email, refreshToken: tokens.refresh_token});
+        user = new userModel({ email, refreshToken: tokens.refresh_token, userName: 'Temp' });
       } else {
         user.refreshToken = tokens.refresh_token;
       }
