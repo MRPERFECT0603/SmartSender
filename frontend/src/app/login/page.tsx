@@ -32,7 +32,7 @@ export default function LoginPage() {
                 router.push(`/dashboard`);
             }
             else if (res.status === 202 && data.authUrl) {
-                window.location.href = data.authUrl;
+                window.open(data.authUrl, '_blank');
             }
             else {
                 alert(data.error || 'Login failed');
