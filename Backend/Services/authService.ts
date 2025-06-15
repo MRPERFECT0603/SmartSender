@@ -59,7 +59,20 @@ export async function handleCallback(req: Request, res: Response): Promise<void>
     }));
 
     oAuth2Client.emit('tokensSaved', null);
-    res.status(200).send('Access Granted');
+    res.send(`
+  <html>
+    <body>
+      <script>
+        if (window.opener) {
+          window.opener.postMessage({ type: 'oauth_complete', status: 'success' }, '*');
+          window.close();
+        } else {
+          document.write("You may now close this window.");
+        }
+      </script>
+    </body>
+  </html>
+`);
   } catch (error: any) {
     console.error(JSON.stringify({
       level: 'error',
