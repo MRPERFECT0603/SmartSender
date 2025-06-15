@@ -15,7 +15,8 @@ app.use(express.json());
 
 app.use(
     cors({
-      origin: ['http://localhost:3000' , 'https://smartsender.netlify.app']
+      origin: ["http://localhost:3000" , "https://smartsender.netlify.app"],
+      credentials: true, 
     })
 );
 
