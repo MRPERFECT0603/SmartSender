@@ -83,14 +83,14 @@ export default function LoginPage() {
                 <h2 className="text-2xl font-semibold text-center">Login to SmartSender</h2>
 
                 <div>
-                    <label className="block text-sm font-medium">UserName</label>
+                    <label className="block text-sm font-medium">Name</label>
                     <input
                         type="text"
                         className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         value={userName}
                         onChange={e => setUser(e.target.value)}
                         required
-                        placeholder='Your UserName'
+                        placeholder='Reagrds [Name] (Name sent on Email)'
                     />
                 </div>
 
