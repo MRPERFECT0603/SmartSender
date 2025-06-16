@@ -266,6 +266,7 @@ export default function DashboardPage() {
               <label className="w-20 font-medium text-gray-700">From:</label>
               <input
                 type="email"
+                value={fromEmail}
                 disabled
                 className="flex-1 px-4 py-2 border rounded-md bg-gray-100 text-gray-600"
               />
