@@ -266,10 +266,8 @@ export default function DashboardPage() {
               <label className="w-20 font-medium text-gray-700">From:</label>
               <input
                 type="email"
-                value={fromEmail}
-                onChange={(e) => setFromEmail(e.target.value)}
-                placeholder="your-email@example.com"
-                className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+                disabled
+                className="flex-1 px-4 py-2 border rounded-md bg-gray-100 text-gray-600"
               />
             </div>
 
