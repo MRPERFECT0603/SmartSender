@@ -23,9 +23,24 @@ export const uploadXlsx = (req: Request, res: Response): void => {
       const workbook = xlsx.read(file.buffer, { type: "buffer" });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const jsonData = xlsx.utils.sheet_to_json(sheet);
 
-      allData.push(...jsonData); 
+      const rawData = xlsx.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+      const [headerRow, ...dataRows] = rawData;
+
+      const lowerHeaders = headerRow.map((h: any) =>
+        typeof h === "string" ? h.trim().toLowerCase() : h
+      );
+
+      const formattedData = dataRows.map((row: any[]) => {
+        const entry: Record<string, any> = {};
+        lowerHeaders.forEach((key: string, idx: number) => {
+          entry[key] = row[idx];
+        });
+        return entry;
+      });
+
+      allData.push(...formattedData);
     });
 
     res.json(allData); 
