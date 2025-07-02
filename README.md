@@ -6,7 +6,7 @@ SmartSender is a full-stack web application that enables users to send personali
 
 ## Project Demo
 
-[![Watch the demo](Documentation/Project_Digrams/ProjectSS.png)](https://www.youtube.com/watch?v=R4H83FJqNKA)
+[![Watch the demo](/ProjectDemo.png)](https://www.youtube.com/watch?v=R4H83FJqNKA)
 
 ## Features
 
