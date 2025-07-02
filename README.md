@@ -4,6 +4,10 @@
 
 SmartSender is a full-stack web application that enables users to send personalized bulk emails efficiently. Built with Next.js frontend and Node.js/Express backend, it integrates with Gmail OAuth2 for secure email sending and supports Excel/CSV file uploads for contact management.
 
+## Project Demo
+
+[![Watch the demo](Documentation/Project_Digrams/ProjectSS.png)](https://www.youtube.com/watch?v=R4H83FJqNKA)
+
 ## Features
 
 - **OAuth2 Gmail Integration**: Secure authentication with Google Gmail API
