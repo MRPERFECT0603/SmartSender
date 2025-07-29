@@ -1,9 +1,21 @@
 import mongoose from 'mongoose';
 
+const profileSchema = new mongoose.Schema({
+    email: { type: String, required: true },
+    name: { type: String, required: true },
+    contact: { type: String, default: '' },
+    linkedIn: { type: String, default: '' },
+    company: { type: String, default: '' },
+    position: { type: String, default: '' },
+    appPassword: { type: String, default: '' }
+});
+
 const userSchema = new mongoose.Schema({
-    userName: { type: String , required: true},
     email: { type: String, required: true, unique: true },
-    refreshToken: { type: String, required: true },
+    googleId: { type: String }, // Optional for app password users
+    name: { type: String, required: true },
+    picture: { type: String },
+    profile: { type: profileSchema },
     createdAt: { type: Date, default: Date.now },
 });
 

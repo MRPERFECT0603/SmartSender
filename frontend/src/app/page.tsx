@@ -1,3 +1,5 @@
+import React from 'react'
+import Image from 'next/image'
 
 export default function HomePage() {
   return (
@@ -25,16 +27,20 @@ export default function HomePage() {
       <section className="p-40 -mt-88">
         <div className="relative w-fit mx-auto">
           {/* Otter image positioned above and to the right */}
-          <img
-            src="./otterpeaking.png"
+          <Image
+            src="/otterpeaking.png"
             alt="Otter peeking"
+            width={216}
+            height={216}
             className="absolute -top-40 right-0 h-54"
           />
 
           {/* Main tab image */}
-          <img
-            src="./smartSender.png"
+          <Image
+            src="/SmartSender.png"
             alt="Image of a Tab"
+            width={800}
+            height={600}
             className="h-auto rounded-2xl"
           />
         </div>
@@ -42,9 +48,11 @@ export default function HomePage() {
 
       <section className="py-10 px-40 max-h-screen">
         <div className="rounded-2xl">
-          <img
-            src="./smartSenderUser.png"
+          <Image
+            src="/smartSenderUser.png"
             alt="Image of a Tab"
+            width={800}
+            height={600}
             className="h-auto px-20 rounded-2xl"
           />
         </div>

@@ -1,2 +1,7 @@
 # Local Netlify folder
 .netlify
+node_modules
+.env
+dist
+uploads
+*.iml
