@@ -313,7 +313,7 @@ export default function DashboardPage() {
           {/* Body Section: Realistic Email Format */}
           <div className="bg-gray-50 p-6 rounded-md border text-gray-800 font-[serif]">
             <p className="mb-4">
-              Dear{' '}
+              Hi{' '}
               <input
                 type="text"
                 placeholder="Recipient Name from Excel"
@@ -329,7 +329,7 @@ export default function DashboardPage() {
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
             <p className="mt-6">
-              Best Regards,
+              Warm Regards,
               <br />
               <input
                 type="text"
