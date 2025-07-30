@@ -38,18 +38,32 @@ fi
 
 print_info "Current directory: $(pwd)"
 
-# Step 1: Git Setup
+# Step 1: Git Setup and Branch Management
 echo ""
-echo "📁 Step 1: Git Repository Setup"
-echo "==============================="
+echo "📁 Step 1: Git Repository and Branch Setup"
+echo "=========================================="
 
 if [ ! -d ".git" ]; then
-    print_info "Initializing Git repository..."
-    git init
-    print_status "Git repository initialized"
+    print_error "No Git repository found. Please run this from a Git repository."
+    exit 1
 else
-    print_status "Git repository already exists"
+    print_status "Git repository exists"
 fi
+
+# Fetch latest changes
+print_info "Fetching latest changes from remote..."
+git fetch origin
+
+# Check if improvements branch exists locally
+if git show-ref --verify --quiet refs/heads/improvements; then
+    print_status "Local improvements branch exists"
+    git checkout improvements
+else
+    print_info "Creating local improvements branch from remote..."
+    git checkout -b improvements origin/improvements
+fi
+
+print_status "Switched to improvements branch"
 
 # Step 2: Add files
 echo ""
@@ -68,53 +82,68 @@ else
     print_status "Changes committed"
 fi
 
-# Step 3: Remote repository setup
+# Step 3: Remote repository check
 echo ""
-echo "🌐 Step 3: GitHub Organization Setup"
-echo "===================================="
+echo "🌐 Step 3: GitHub Repository Check"
+echo "=================================="
 
 # Check if origin remote exists
 if git remote get-url origin > /dev/null 2>&1; then
     ORIGIN_URL=$(git remote get-url origin)
-    print_status "Remote origin already set: $ORIGIN_URL"
+    print_status "Remote origin set: $ORIGIN_URL"
 else
-    print_warning "Remote origin not set"
-    echo ""
-    print_info "Please follow these steps:"
-    echo "1. Go to your GitHub organization"
-    echo "2. Create a new repository (e.g., 'smartsender')"
-    echo "3. Copy the repository URL"
-    echo ""
-    read -p "Enter your GitHub organization repository URL: " REPO_URL
-    
-    if [ ! -z "$REPO_URL" ]; then
-        git remote add origin "$REPO_URL"
-        print_status "Remote origin set to: $REPO_URL"
-    else
-        print_error "Repository URL is required"
-        exit 1
-    fi
+    print_error "Remote origin not set. Please add your GitHub repository as origin."
+    echo "Example: git remote add origin https://github.com/your-org/smartsender.git"
+    exit 1
 fi
 
-# Step 4: Push to GitHub
+# Step 4: Push to GitHub and Create PR
 echo ""
-echo "⬆️  Step 4: Pushing to GitHub"
-echo "============================="
+echo "⬆️  Step 4: Pushing to GitHub and Creating PR"
+echo "============================================="
 
-print_info "Pushing to GitHub..."
-if git push -u origin main 2>/dev/null; then
-    print_status "Code pushed to GitHub successfully"
-elif git push -u origin master 2>/dev/null; then
-    print_status "Code pushed to GitHub successfully (master branch)"
+print_info "Pushing improvements branch to GitHub..."
+if git push origin improvements; then
+    print_status "Improvements branch pushed to GitHub successfully"
 else
-    # Try to set upstream and push
-    git branch -M main
-    if git push -u origin main; then
-        print_status "Code pushed to GitHub successfully"
+    print_error "Failed to push to GitHub. Please check your repository access."
+    exit 1
+fi
+
+echo ""
+print_info "🔄 Creating Pull Request..."
+echo ""
+echo "Please follow these steps to create a Pull Request:"
+echo "1. Go to your GitHub repository"
+echo "2. You should see a 'Compare & pull request' button for the improvements branch"
+echo "3. Click it and create a PR with title: 'Deploy: SmartSender improvements for Netlify'"
+echo "4. Add description of changes (uploaded contacts feature, deployment configs, etc.)"
+echo "5. Assign reviewers if needed"
+echo "6. Click 'Create pull request'"
+echo ""
+echo "GitHub Repository URL: $(git remote get-url origin 2>/dev/null || echo 'Not set')"
+echo ""
+
+read -p "Have you created the Pull Request? (y/n): " PR_CREATED
+
+if [ "$PR_CREATED" = "y" ] || [ "$PR_CREATED" = "Y" ]; then
+    print_status "Great! PR created."
+    
+    echo ""
+    read -p "Do you want to merge the PR now? (y/n): " MERGE_PR
+    
+    if [ "$MERGE_PR" = "y" ] || [ "$MERGE_PR" = "Y" ]; then
+        print_info "Switching to main branch and merging..."
+        git checkout main
+        git pull origin main
+        git merge improvements
+        git push origin main
+        print_status "✅ PR merged and main branch updated!"
     else
-        print_error "Failed to push to GitHub. Please check your repository URL and permissions."
-        exit 1
+        print_info "You can merge the PR later through GitHub interface or locally."
     fi
+else
+    print_warning "Please create the PR before proceeding with deployment."
 fi
 
 # Step 5: Netlify deployment instructions
@@ -158,15 +187,17 @@ echo ""
 echo "✅ Final Deployment Checklist"
 echo "============================="
 
-echo "□ Code pushed to GitHub organization"
+echo "□ Improvements branch created and pushed"
+echo "□ Pull Request created and reviewed"
+echo "□ PR merged to main branch"
 echo "□ Netlify site created and configured"
 echo "□ Environment variables set in Netlify"
 echo "□ Backend CORS updated with Netlify domain"
 echo "□ Test all features on live site"
 echo ""
 
-print_status "Deployment preparation complete!"
-print_info "Your repository is ready for Netlify deployment."
+print_status "Git workflow and deployment preparation complete!"
+print_info "Your improvements branch is ready for deployment."
 
 echo ""
 echo "🔗 Useful Links:"
