@@ -12,18 +12,68 @@ const app:Express = express();
 const PORT = process.env.PORT;
 
 //middleware
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.use(
     cors({
-      origin: ["http://localhost:3000", "http://localhost:3001", "https://smartsender.netlify.app"],
+      origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "https://smartsender.netlify.app"],
       credentials: true, 
     })
 );
 
-// Add request logging
+// Enhanced request/response logging middleware
 app.use((req: Request, res: Response, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substr(2, 9);
+  
+  // Log incoming request
+  console.log(`\n🔵 [${requestId}] ${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log(`📋 [${requestId}] Headers:`, JSON.stringify(req.headers, null, 2));
+  
+  // Log query parameters if present
+  if (Object.keys(req.query).length > 0) {
+    console.log(`❓ [${requestId}] Query:`, JSON.stringify(req.query, null, 2));
+  }
+  
+  // Log body for POST/PUT requests (but limit size for file uploads)
+  if (req.method !== 'GET' && req.body) {
+    const bodyToLog = JSON.stringify(req.body).length > 1000 
+      ? JSON.stringify(req.body).substring(0, 1000) + '... [TRUNCATED]'
+      : JSON.stringify(req.body, null, 2);
+    console.log(`📦 [${requestId}] Body:`, bodyToLog);
+  }
+  
+  // Log file uploads
+  if (req.files) {
+    const files = Array.isArray(req.files) ? req.files : Object.values(req.files).flat();
+    console.log(`📁 [${requestId}] Files:`, files.map((f: any) => ({ 
+      fieldname: f.fieldname, 
+      originalname: f.originalname, 
+      size: f.size,
+      mimetype: f.mimetype 
+    })));
+  }
+  
+  // Store request ID for response logging
+  (req as any).requestId = requestId;
+  
+  // Intercept response
+  const originalSend = res.send;
+  res.send = function(data) {
+    const duration = Date.now() - startTime;
+    console.log(`\n🟢 [${requestId}] Response Status: ${res.statusCode} | Duration: ${duration}ms`);
+    
+    // Log response data (limit size)
+    const responseToLog = typeof data === 'string' && data.length > 1000 
+      ? data.substring(0, 1000) + '... [TRUNCATED]'
+      : data;
+    console.log(`📤 [${requestId}] Response:`, responseToLog);
+    console.log(`═══════════════════════════════════════════════════════════════\n`);
+    
+    return originalSend.call(this, data);
+  };
+  
   next();
 });
 

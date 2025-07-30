@@ -5,3 +5,8 @@ node_modules
 dist
 uploads
 *.iml
+.idea
+
+# macOS system files
+.DS_Store
+**/.DS_Store

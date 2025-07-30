@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
+import { BASE_URL } from '../config'
 
 interface UserProfile {
   email: string
@@ -48,9 +49,54 @@ export default function ProfileComponent() {
   }, [])
 
   const handleSave = async () => {
+    // Check if user is properly logged in
+    if (!profile.email) {
+      toast.error('Please log in first to update your profile')
+      return
+    }
+
+    // Validate required fields
+    if (!profile.name || profile.name.trim() === '') {
+      toast.error('Name is required. Please enter your name.')
+      return
+    }
+
+    if (!profile.email || profile.email.trim() === '') {
+      toast.error('Email is required. Please log in again.')
+      return
+    }
+
     setLoading(true)
     try {
-      // Save to localStorage
+      console.log('Saving profile data:', { 
+        email: profile.email, 
+        name: profile.name, 
+        contact: profile.contact, 
+        linkedIn: profile.linkedIn, 
+        company: profile.company, 
+        position: profile.position,
+        hasAppPassword: !!profile.appPassword
+      });
+
+      // Save to backend database
+      const response = await fetch(`${BASE_URL}/api/userlogin/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        if (response.status === 404) {
+          throw new Error("User not found. Please log out and log in again to refresh your account.")
+        }
+        throw new Error(errorData.error || 'Failed to save profile')
+      }
+
+      const result = await response.json()
+      console.log('Profile update result:', result)
+
+      // Save to localStorage only after successful backend save
       localStorage.setItem('userEmail', profile.email)
       localStorage.setItem('userName', profile.name)
       localStorage.setItem('contact', profile.contact)
@@ -59,17 +105,11 @@ export default function ProfileComponent() {
       if (profile.position) localStorage.setItem('position', profile.position)
       if (profile.appPassword) localStorage.setItem('appPassword', profile.appPassword)
 
-      // TODO: Save to backend database
-      // const response = await fetch('/api/profile', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(profile)
-      // })
-
       toast.success('Profile updated successfully!')
       setIsEditing(false)
-    } catch {
-      toast.error('Failed to update profile')
+    } catch (error: any) {
+      console.error('Profile save error:', error)
+      toast.error(error.message || 'Failed to update profile')
     } finally {
       setLoading(false)
     }

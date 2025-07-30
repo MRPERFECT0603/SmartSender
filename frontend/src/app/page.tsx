@@ -1,7 +1,23 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export default function HomePage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const userEmail = localStorage.getItem('userEmail')
+    const userName = localStorage.getItem('userName')
+    
+    if (userEmail && userName) {
+      // Redirect to dashboard if already authenticated
+      router.push('/dashboard')
+    }
+  }, [router])
+
   return (
     <main className="min-h-screen bg-custom-lightblue flex flex-col items-center justify-center px-4 text-center">
       <section className="h-screen py-48">

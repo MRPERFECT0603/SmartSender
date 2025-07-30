@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 import { BASE_URL } from "../../../src/config"
 import ProfileComponent from '../../components/profile'
+import ProtectedRoute from '../../components/ProtectedRoute'
 import { toast } from 'react-toastify'
 
 interface ExcelRow {
@@ -17,13 +18,15 @@ interface ExcelRow {
 
 interface SentEmail {
   id: string
+  toEmail: string
   subject: string
-  message?: string
-  fromEmail: string
-  toEmail?: string
+  recipientName: string
+  company: string
+  status: 'pending' | 'sent' | 'failed'
+  errorMessage?: string
   sentAt: string
-  recipientCount?: number
-  result?: Array<{ email: string; status: string }>
+  attachmentCount: number
+  attachments: Array<{ filename: string; size: number }>
 }
 
 interface ScheduledEmail {
@@ -72,6 +75,8 @@ export default function DashboardPage() {
     const userContact = localStorage.getItem('contact')
     const userLinkedIn = localStorage.getItem('linkedIn')
     
+    console.log('🔍 Loading user data from localStorage:', { userEmail, userName, userContact, userLinkedIn });
+    
     if (userEmail) setFromEmail(userEmail)
     if (userName) setUser(userName)
     if (userContact) setContact(userContact)
@@ -94,6 +99,14 @@ export default function DashboardPage() {
 
   const handleTabClick = (tabName: 'contacts' | 'compose' | 'scheduled' | 'sent' | 'uploaded') => {
     setCurrentTab(tabName);
+    
+    // Auto-load data when switching to specific tabs
+    if (tabName === 'sent' && fromEmail) {
+      loadSentEmails(fromEmail);
+    }
+    if (tabName === 'scheduled' && fromEmail) {
+      loadScheduledEmails(fromEmail);
+    }
   };
 
   useEffect(() => {
@@ -214,25 +227,55 @@ export default function DashboardPage() {
         const json = await res.json()
         setScheduledEmails(json.emails || [])
       } else {
-        console.error('Failed to load scheduled emails')
+        let errorMessage = 'Failed to load scheduled emails'
+        
+        try {
+          const errorData = await res.json()
+          if (errorData.error) {
+            errorMessage = errorData.error
+          }
+        } catch (parseError) {
+          console.error('Error parsing scheduled emails response:', parseError)
+        }
+        
+        console.error('Failed to load scheduled emails:', { status: res.status, errorMessage })
+        setScheduledEmails([])
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load scheduled emails:', err)
+      setScheduledEmails([])
     }
   };
 
   const loadSentEmails = async (userEmail: string) => {
     try {
+      console.log('🔄 Loading sent emails for:', userEmail);
       const res = await fetch(`${BASE_URL}/api/sent-emails?fromEmail=${encodeURIComponent(userEmail)}`);
-      const json = await res.json();
+      
+      console.log('📡 Sent emails API response status:', res.status);
       
       if (res.ok) {
+        const json = await res.json();
+        console.log('✅ Sent emails loaded:', json);
         setSentEmails(json.emails || []);
       } else {
-        console.error('Failed to load sent emails:', json.error);
+        let errorMessage = 'Failed to load sent emails'
+        
+        try {
+          const errorData = await res.json()
+          if (errorData.error) {
+            errorMessage = errorData.error
+          }
+        } catch (parseError) {
+          console.error('Error parsing sent emails response:', parseError)
+        }
+        
+        console.error('❌ Failed to load sent emails:', { status: res.status, errorMessage })
+        setSentEmails([])
       }
-    } catch (err) {
-      console.error('Error loading sent emails:', err);
+    } catch (err: any) {
+      console.error('💥 Error loading sent emails:', err);
+      setSentEmails([])
     }
   };
 
@@ -288,13 +331,65 @@ export default function DashboardPage() {
           : `Emails sent successfully! ${uniqueSelectedData.length} emails sent.`
         setMailStatus(message)
         setPerEmailStatus(json.result || [])
+        toast.success(message)
+        
+        // Refresh sent emails list after successful sending
+        loadSentEmails(fromEmail)
       } else {
-        const json = await res.json()
-        setMailStatus(`Failed to send emails: ${json.error}`)
+        // Enhanced error handling for different status codes
+        let errorMessage = 'Failed to send emails'
+        
+        try {
+          const errorData = await res.json()
+          if (errorData.error) {
+            errorMessage = errorData.error
+          }
+          
+          // Handle specific error types
+          if (res.status === 400) {
+            errorMessage = `Bad Request: ${errorData.error || 'Invalid request data'}`
+          } else if (res.status === 401) {
+            errorMessage = 'Authentication failed. Please check your credentials.'
+          } else if (res.status === 404) {
+            errorMessage = 'User not found. Please log in again.'
+          } else if (res.status === 500) {
+            if (errorData.error?.includes('App password')) {
+              errorMessage = 'Gmail App Password not configured. Please set it up in your profile.'
+            } else if (errorData.error?.includes('authentication')) {
+              errorMessage = 'Gmail authentication failed. Please verify your app password.'
+            } else if (errorData.error?.includes('User not found')) {
+              errorMessage = 'User not found. Please log in again.'
+            } else {
+              errorMessage = `Server Error: ${errorData.error || 'Internal server error'}`
+            }
+          }
+        } catch (parseError) {
+          console.error('Error parsing response:', parseError)
+          errorMessage = `Failed to send emails (Status: ${res.status})`
+        }
+        
+        console.error('Send mail error:', { status: res.status, errorMessage })
+        setMailStatus(errorMessage)
+        setPerEmailStatus([])
+        toast.error(errorMessage)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Send error:', err)
-      setMailStatus('Failed to send emails. Please try again.')
+      
+      // Enhanced error handling for network and other errors
+      let errorMessage = 'Failed to send emails. Please try again.'
+      
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.'
+      } else if (err.message.includes('timeout')) {
+        errorMessage = 'Request timeout. Please try again.'
+      } else if (err.message) {
+        errorMessage = `Error: ${err.message}`
+      }
+      
+      setMailStatus(errorMessage)
+      setPerEmailStatus([])
+      toast.error(errorMessage)
     } finally {
       setSending(false)
     }
@@ -357,16 +452,54 @@ export default function DashboardPage() {
           : `Email scheduled successfully! ${uniqueSelectedData.length} emails scheduled.`
         setMailStatus(message)
         setScheduledFor('')
+        toast.success(message)
         // Reload scheduled emails
         if (fromEmail) {
           loadScheduledEmails(fromEmail)
         }
       } else {
-        setMailStatus('Failed to schedule email.')
+        // Enhanced error handling for scheduling
+        let errorMessage = 'Failed to schedule email'
+        
+        try {
+          const errorData = await res.json()
+          if (errorData.error) {
+            errorMessage = errorData.error
+          }
+          
+          if (res.status === 400) {
+            errorMessage = `Invalid request: ${errorData.error || 'Please check your input data'}`
+          } else if (res.status === 401) {
+            errorMessage = 'Authentication failed. Please log in again.'
+          } else if (res.status === 404) {
+            errorMessage = 'User not found. Please log in again.'
+          } else if (res.status === 500) {
+            errorMessage = `Server error: ${errorData.error || 'Internal server error'}`
+          }
+        } catch (parseError) {
+          console.error('Error parsing schedule response:', parseError)
+          errorMessage = `Failed to schedule email (Status: ${res.status})`
+        }
+        
+        console.error('Schedule error:', { status: res.status, errorMessage })
+        setMailStatus(errorMessage)
+        toast.error(errorMessage)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Schedule error:', err)
-      setMailStatus('Failed to schedule email. Please try again.')
+      
+      let errorMessage = 'Failed to schedule email. Please try again.'
+      
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.'
+      } else if (err.message.includes('timeout')) {
+        errorMessage = 'Request timeout. Please try again.'
+      } else if (err.message) {
+        errorMessage = `Error: ${err.message}`
+      }
+      
+      setMailStatus(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setSending(false)
     }
@@ -382,16 +515,52 @@ export default function DashboardPage() {
 
       if (res.ok) {
         setMailStatus('Scheduled email cancelled successfully.')
+        toast.success('Scheduled email cancelled successfully.')
         // Reload scheduled emails
         if (fromEmail) {
           loadScheduledEmails(fromEmail)
         }
       } else {
-        setMailStatus('Failed to cancel scheduled email.')
+        // Enhanced error handling for cancelling scheduled emails
+        let errorMessage = 'Failed to cancel scheduled email'
+        
+        try {
+          const errorData = await res.json()
+          if (errorData.error) {
+            errorMessage = errorData.error
+          }
+          
+          if (res.status === 404) {
+            errorMessage = 'Scheduled email not found or already cancelled.'
+          } else if (res.status === 401) {
+            errorMessage = 'Authentication failed. Please log in again.'
+          } else if (res.status === 500) {
+            errorMessage = `Server error: ${errorData.error || 'Internal server error'}`
+          }
+        } catch (parseError) {
+          console.error('Error parsing cancel response:', parseError)
+          errorMessage = `Failed to cancel scheduled email (Status: ${res.status})`
+        }
+        
+        console.error('Cancel scheduled email error:', { status: res.status, errorMessage })
+        setMailStatus(errorMessage)
+        toast.error(errorMessage)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Cancel scheduled email error:', err)
-      setMailStatus('Failed to cancel scheduled email. Please try again.')
+      
+      let errorMessage = 'Failed to cancel scheduled email. Please try again.'
+      
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.'
+      } else if (err.message.includes('timeout')) {
+        errorMessage = 'Request timeout. Please try again.'
+      } else if (err.message) {
+        errorMessage = `Error: ${err.message}`
+      }
+      
+      setMailStatus(errorMessage)
+      toast.error(errorMessage)
     }
   };
 
@@ -563,7 +732,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 bg-custom-lightblue min-h-screen">
+    <ProtectedRoute>
+      <div className="p-4 sm:p-6 bg-custom-lightblue min-h-screen">
       <div className="max-w-5xl mx-auto">
         
         {/* Header with Profile Dropdown */}
@@ -592,6 +762,20 @@ export default function DashboardPage() {
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="p-4">
                     <ProfileComponent />
+                    {/* Logout Button */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <button
+                        onClick={() => {
+                          // Clear all localStorage data
+                          localStorage.clear()
+                          // Redirect to login page
+                          window.location.href = '/login'
+                        }}
+                        className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                      >
+                        🚪 Logout
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1099,34 +1283,47 @@ export default function DashboardPage() {
             {sentEmails.length > 0 ? (
               <div className="space-y-4">
                 {sentEmails.map((email, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                  <div key={email.id || index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-green-600">✅</span>
+                          <span className={email.status === 'sent' ? 'text-green-600' : email.status === 'failed' ? 'text-red-600' : 'text-yellow-600'}>
+                            {email.status === 'sent' ? '✅' : email.status === 'failed' ? '❌' : '⏳'}
+                          </span>
                           <h4 className="font-medium text-gray-900">{email.subject || 'No Subject'}</h4>
-                          <span className="text-xs text-gray-500 bg-green-100 text-green-700 px-2 py-1 rounded">
-                            Sent
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            email.status === 'sent' 
+                              ? 'bg-green-100 text-green-700' 
+                              : email.status === 'failed' 
+                                ? 'bg-red-100 text-red-700' 
+                                : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {email.status.charAt(0).toUpperCase() + email.status.slice(1)}
                           </span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
                           <div>
-                            <span className="font-medium">To:</span> {email.toEmail || 'Multiple recipients'}
+                            <span className="font-medium">To:</span> {email.toEmail}
                           </div>
                           <div>
-                            <span className="font-medium">From:</span> {email.fromEmail || fromEmail}
+                            <span className="font-medium">Name:</span> {email.recipientName || 'N/A'}
+                          </div>
+                          <div>
+                            <span className="font-medium">Company:</span> {email.company || 'N/A'}
                           </div>
                           <div>
                             <span className="font-medium">Sent:</span> {email.sentAt ? new Date(email.sentAt).toLocaleString() : 'Unknown'}
                           </div>
-                          <div>
-                            <span className="font-medium">Recipients:</span> {email.recipientCount || 'Unknown'} emails
-                          </div>
+                          {email.attachmentCount > 0 && (
+                            <div>
+                              <span className="font-medium">Attachments:</span> {email.attachmentCount} file(s)
+                            </div>
+                          )}
                         </div>
-                        {email.message && (
-                          <div className="mt-2">
-                            <span className="font-medium text-sm text-gray-700">Message:</span>
-                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{email.message}</p>
+                        {email.status === 'failed' && email.errorMessage && (
+                          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                            <span className="font-medium text-sm text-red-700">Error:</span>
+                            <p className="text-sm text-red-600 mt-1">{email.errorMessage}</p>
                           </div>
                         )}
                       </div>
@@ -1185,5 +1382,6 @@ export default function DashboardPage() {
       </div>
     </div>
   </div>
+    </ProtectedRoute>
   );
 }

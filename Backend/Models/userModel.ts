@@ -12,7 +12,8 @@ const profileSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
-    googleId: { type: String }, // Optional for app password users
+    password: { type: String }, // For email/password login
+    googleId: { type: String }, // Optional for Google OAuth users
     name: { type: String, required: true },
     picture: { type: String },
     profile: { type: profileSchema },

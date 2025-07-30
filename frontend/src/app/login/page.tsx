@@ -192,30 +192,60 @@ export default function LoginPage() {
         setIsLoading(true)
 
         try {
-            // Simple email/password validation
+            // Validate email and password
             if (!loginCredentials.email || !loginCredentials.password) {
                 toast.error('Please enter both email and password')
                 return
             }
 
-            // For now, we'll create a simple user session
-            // In production, you'd validate with backend
-            const userData = {
-                email: loginCredentials.email,
-                name: loginCredentials.email.split('@')[0], // Use email prefix as name
-                password: loginCredentials.password
+            console.log('🔐 Attempting to authenticate user:', loginCredentials.email);
+
+            // Authenticate user with backend
+            const authRes = await fetch(`${BASE_URL}/api/authenticate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    email: loginCredentials.email,
+                    password: loginCredentials.password
+                })
+            })
+
+            if (authRes.status === 200) {
+                const userData = await authRes.json()
+                console.log('✅ Authentication successful:', userData);
+
+                // Load user profile if it exists
+                if (userData.profile) {
+                    setProfile(userData.profile)
+                    localStorage.setItem('userEmail', userData.profile.email)
+                    localStorage.setItem('userName', userData.profile.name)
+                    localStorage.setItem('contact', userData.profile.contact || '')
+                    localStorage.setItem('linkedIn', userData.profile.linkedIn || '')
+                    localStorage.setItem('company', userData.profile.company || '')
+                    localStorage.setItem('position', userData.profile.position || '')
+                    if (userData.profile.appPassword) {
+                        localStorage.setItem('appPassword', userData.profile.appPassword)
+                    }
+                    toast.success('Login successful!')
+                    router.push('/dashboard')
+                } else {
+                    // User authenticated but no profile exists, create one
+                    setProfile({
+                        email: userData.email,
+                        name: userData.name,
+                        contact: '',
+                        linkedIn: '',
+                        company: '',
+                        position: '',
+                        appPassword: ''
+                    })
+                    setShowProfileForm(true)
+                }
+            } else {
+                const error = await authRes.json()
+                console.error('❌ Authentication failed:', error);
+                toast.error(error.error || 'Invalid email or password')
             }
-
-            // Save to localStorage for now (in production, you'd validate with backend)
-            localStorage.setItem('userEmail', userData.email)
-            localStorage.setItem('userName', userData.name)
-            localStorage.setItem('contact', '')
-            localStorage.setItem('linkedIn', '')
-            localStorage.setItem('company', '')
-            localStorage.setItem('position', '')
-
-            toast.success('Login successful!')
-            router.push('/dashboard')
         } catch (err) {
             console.error('Email login error:', err)
             toast.error('Login failed. Please try again.')
