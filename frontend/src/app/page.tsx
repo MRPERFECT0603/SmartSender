@@ -1,5 +1,23 @@
+'use client'
+
+import React, { useEffect } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export default function HomePage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const userEmail = localStorage.getItem('userEmail')
+    const userName = localStorage.getItem('userName')
+    
+    if (userEmail && userName) {
+      // Redirect to dashboard if already authenticated
+      router.push('/dashboard')
+    }
+  }, [router])
+
   return (
     <main className="min-h-screen bg-custom-lightblue flex flex-col items-center justify-center px-4 text-center">
       <section className="h-screen py-48">
@@ -25,16 +43,20 @@ export default function HomePage() {
       <section className="p-40 -mt-88">
         <div className="relative w-fit mx-auto">
           {/* Otter image positioned above and to the right */}
-          <img
-            src="./otterpeaking.png"
+          <Image
+            src="/otterpeaking.png"
             alt="Otter peeking"
+            width={216}
+            height={216}
             className="absolute -top-40 right-0 h-54"
           />
 
           {/* Main tab image */}
-          <img
-            src="./smartSender.png"
+          <Image
+            src="/SmartSender.png"
             alt="Image of a Tab"
+            width={800}
+            height={600}
             className="h-auto rounded-2xl"
           />
         </div>
@@ -42,9 +64,11 @@ export default function HomePage() {
 
       <section className="py-10 px-40 max-h-screen">
         <div className="rounded-2xl">
-          <img
-            src="./smartSenderUser.png"
+          <Image
+            src="/smartSenderUser.png"
             alt="Image of a Tab"
+            width={800}
+            height={600}
             className="h-auto px-20 rounded-2xl"
           />
         </div>
