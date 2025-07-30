@@ -1,3 +1,4 @@
 // config.ts
-export const BASE_URL = "http://localhost:8102";
-// export const BASE_URL = "https://smartsender.onrender.com";
+// Use environment variable or fallback to production URL
+export const BASE_URL = "https://smartsender.onrender.com";
+// For local development: "http://localhost:8102"
